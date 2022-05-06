@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
         close(fd_server);
         exit(1);
     }
-    int index
+    int index;
     while(1){
         fd_client = accept(fd_server, (struct sockaddr *) &client_addr, &sin_len);
 

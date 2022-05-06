@@ -86,376 +86,6 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./node_modules/asn1js/node_modules/pvutils/build/utils.es.js":
-/*!********************************************************************!*\
-  !*** ./node_modules/asn1js/node_modules/pvutils/build/utils.es.js ***!
-  \********************************************************************/
-/*! exports provided: arrayBufferToString, bufferToHexCodes, checkBufferParams, clearProps, fromBase64, getParametersValue, getUTCDate, isEqualBuffer, nearestPowerOf2, padNumber, stringToArrayBuffer, toBase64, utilConcatBuf, utilConcatView, utilDecodeTC, utilEncodeTC, utilFromBase, utilToBase */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arrayBufferToString", function() { return arrayBufferToString; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bufferToHexCodes", function() { return bufferToHexCodes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "checkBufferParams", function() { return checkBufferParams; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clearProps", function() { return clearProps; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromBase64", function() { return fromBase64; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getParametersValue", function() { return getParametersValue; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getUTCDate", function() { return getUTCDate; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEqualBuffer", function() { return isEqualBuffer; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nearestPowerOf2", function() { return nearestPowerOf2; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "padNumber", function() { return padNumber; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stringToArrayBuffer", function() { return stringToArrayBuffer; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toBase64", function() { return toBase64; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utilConcatBuf", function() { return utilConcatBuf; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utilConcatView", function() { return utilConcatView; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utilDecodeTC", function() { return utilDecodeTC; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utilEncodeTC", function() { return utilEncodeTC; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utilFromBase", function() { return utilFromBase; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utilToBase", function() { return utilToBase; });
-/*!
- Copyright (c) Peculiar Ventures, LLC
-*/
-
-function getUTCDate(date) {
-    return new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
-}
-function getParametersValue(parameters, name, defaultValue) {
-    var _a;
-    if ((parameters instanceof Object) === false) {
-        return defaultValue;
-    }
-    return (_a = parameters[name]) !== null && _a !== void 0 ? _a : defaultValue;
-}
-function bufferToHexCodes(inputBuffer, inputOffset = 0, inputLength = (inputBuffer.byteLength - inputOffset), insertSpace = false) {
-    let result = "";
-    for (const item of (new Uint8Array(inputBuffer, inputOffset, inputLength))) {
-        const str = item.toString(16).toUpperCase();
-        if (str.length === 1) {
-            result += "0";
-        }
-        result += str;
-        if (insertSpace) {
-            result += " ";
-        }
-    }
-    return result.trim();
-}
-function checkBufferParams(baseBlock, inputBuffer, inputOffset, inputLength) {
-    if (!(inputBuffer instanceof ArrayBuffer)) {
-        baseBlock.error = "Wrong parameter: inputBuffer must be \"ArrayBuffer\"";
-        return false;
-    }
-    if (!inputBuffer.byteLength) {
-        baseBlock.error = "Wrong parameter: inputBuffer has zero length";
-        return false;
-    }
-    if (inputOffset < 0) {
-        baseBlock.error = "Wrong parameter: inputOffset less than zero";
-        return false;
-    }
-    if (inputLength < 0) {
-        baseBlock.error = "Wrong parameter: inputLength less than zero";
-        return false;
-    }
-    if ((inputBuffer.byteLength - inputOffset - inputLength) < 0) {
-        baseBlock.error = "End of input reached before message was fully decoded (inconsistent offset and length values)";
-        return false;
-    }
-    return true;
-}
-function utilFromBase(inputBuffer, inputBase) {
-    let result = 0;
-    if (inputBuffer.length === 1) {
-        return inputBuffer[0];
-    }
-    for (let i = (inputBuffer.length - 1); i >= 0; i--) {
-        result += inputBuffer[(inputBuffer.length - 1) - i] * Math.pow(2, inputBase * i);
-    }
-    return result;
-}
-function utilToBase(value, base, reserved = (-1)) {
-    const internalReserved = reserved;
-    let internalValue = value;
-    let result = 0;
-    let biggest = Math.pow(2, base);
-    for (let i = 1; i < 8; i++) {
-        if (value < biggest) {
-            let retBuf;
-            if (internalReserved < 0) {
-                retBuf = new ArrayBuffer(i);
-                result = i;
-            }
-            else {
-                if (internalReserved < i) {
-                    return (new ArrayBuffer(0));
-                }
-                retBuf = new ArrayBuffer(internalReserved);
-                result = internalReserved;
-            }
-            const retView = new Uint8Array(retBuf);
-            for (let j = (i - 1); j >= 0; j--) {
-                const basis = Math.pow(2, j * base);
-                retView[result - j - 1] = Math.floor(internalValue / basis);
-                internalValue -= (retView[result - j - 1]) * basis;
-            }
-            return retBuf;
-        }
-        biggest *= Math.pow(2, base);
-    }
-    return new ArrayBuffer(0);
-}
-function utilConcatBuf(...buffers) {
-    let outputLength = 0;
-    let prevLength = 0;
-    for (const buffer of buffers) {
-        outputLength += buffer.byteLength;
-    }
-    const retBuf = new ArrayBuffer(outputLength);
-    const retView = new Uint8Array(retBuf);
-    for (const buffer of buffers) {
-        retView.set(new Uint8Array(buffer), prevLength);
-        prevLength += buffer.byteLength;
-    }
-    return retBuf;
-}
-function utilConcatView(...views) {
-    let outputLength = 0;
-    let prevLength = 0;
-    for (const view of views) {
-        outputLength += view.length;
-    }
-    const retBuf = new ArrayBuffer(outputLength);
-    const retView = new Uint8Array(retBuf);
-    for (const view of views) {
-        retView.set(view, prevLength);
-        prevLength += view.length;
-    }
-    return retView;
-}
-function utilDecodeTC() {
-    const buf = new Uint8Array(this.valueHex);
-    if (this.valueHex.byteLength >= 2) {
-        const condition1 = (buf[0] === 0xFF) && (buf[1] & 0x80);
-        const condition2 = (buf[0] === 0x00) && ((buf[1] & 0x80) === 0x00);
-        if (condition1 || condition2) {
-            this.warnings.push("Needlessly long format");
-        }
-    }
-    const bigIntBuffer = new ArrayBuffer(this.valueHex.byteLength);
-    const bigIntView = new Uint8Array(bigIntBuffer);
-    for (let i = 0; i < this.valueHex.byteLength; i++) {
-        bigIntView[i] = 0;
-    }
-    bigIntView[0] = (buf[0] & 0x80);
-    const bigInt = utilFromBase(bigIntView, 8);
-    const smallIntBuffer = new ArrayBuffer(this.valueHex.byteLength);
-    const smallIntView = new Uint8Array(smallIntBuffer);
-    for (let j = 0; j < this.valueHex.byteLength; j++) {
-        smallIntView[j] = buf[j];
-    }
-    smallIntView[0] &= 0x7F;
-    const smallInt = utilFromBase(smallIntView, 8);
-    return (smallInt - bigInt);
-}
-function utilEncodeTC(value) {
-    const modValue = (value < 0) ? (value * (-1)) : value;
-    let bigInt = 128;
-    for (let i = 1; i < 8; i++) {
-        if (modValue <= bigInt) {
-            if (value < 0) {
-                const smallInt = bigInt - modValue;
-                const retBuf = utilToBase(smallInt, 8, i);
-                const retView = new Uint8Array(retBuf);
-                retView[0] |= 0x80;
-                return retBuf;
-            }
-            let retBuf = utilToBase(modValue, 8, i);
-            let retView = new Uint8Array(retBuf);
-            if (retView[0] & 0x80) {
-                const tempBuf = retBuf.slice(0);
-                const tempView = new Uint8Array(tempBuf);
-                retBuf = new ArrayBuffer(retBuf.byteLength + 1);
-                retView = new Uint8Array(retBuf);
-                for (let k = 0; k < tempBuf.byteLength; k++) {
-                    retView[k + 1] = tempView[k];
-                }
-                retView[0] = 0x00;
-            }
-            return retBuf;
-        }
-        bigInt *= Math.pow(2, 8);
-    }
-    return (new ArrayBuffer(0));
-}
-function isEqualBuffer(inputBuffer1, inputBuffer2) {
-    if (inputBuffer1.byteLength !== inputBuffer2.byteLength) {
-        return false;
-    }
-    const view1 = new Uint8Array(inputBuffer1);
-    const view2 = new Uint8Array(inputBuffer2);
-    for (let i = 0; i < view1.length; i++) {
-        if (view1[i] !== view2[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-function padNumber(inputNumber, fullLength) {
-    const str = inputNumber.toString(10);
-    if (fullLength < str.length) {
-        return "";
-    }
-    const dif = fullLength - str.length;
-    const padding = new Array(dif);
-    for (let i = 0; i < dif; i++) {
-        padding[i] = "0";
-    }
-    const paddingString = padding.join("");
-    return paddingString.concat(str);
-}
-const base64Template = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-const base64UrlTemplate = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=";
-function toBase64(input, useUrlTemplate = false, skipPadding = false, skipLeadingZeros = false) {
-    let i = 0;
-    let flag1 = 0;
-    let flag2 = 0;
-    let output = "";
-    const template = (useUrlTemplate) ? base64UrlTemplate : base64Template;
-    if (skipLeadingZeros) {
-        let nonZeroPosition = 0;
-        for (let i = 0; i < input.length; i++) {
-            if (input.charCodeAt(i) !== 0) {
-                nonZeroPosition = i;
-                break;
-            }
-        }
-        input = input.slice(nonZeroPosition);
-    }
-    while (i < input.length) {
-        const chr1 = input.charCodeAt(i++);
-        if (i >= input.length) {
-            flag1 = 1;
-        }
-        const chr2 = input.charCodeAt(i++);
-        if (i >= input.length) {
-            flag2 = 1;
-        }
-        const chr3 = input.charCodeAt(i++);
-        const enc1 = chr1 >> 2;
-        const enc2 = ((chr1 & 0x03) << 4) | (chr2 >> 4);
-        let enc3 = ((chr2 & 0x0F) << 2) | (chr3 >> 6);
-        let enc4 = chr3 & 0x3F;
-        if (flag1 === 1) {
-            enc3 = enc4 = 64;
-        }
-        else {
-            if (flag2 === 1) {
-                enc4 = 64;
-            }
-        }
-        if (skipPadding) {
-            if (enc3 === 64) {
-                output += `${template.charAt(enc1)}${template.charAt(enc2)}`;
-            }
-            else {
-                if (enc4 === 64) {
-                    output += `${template.charAt(enc1)}${template.charAt(enc2)}${template.charAt(enc3)}`;
-                }
-                else {
-                    output += `${template.charAt(enc1)}${template.charAt(enc2)}${template.charAt(enc3)}${template.charAt(enc4)}`;
-                }
-            }
-        }
-        else {
-            output += `${template.charAt(enc1)}${template.charAt(enc2)}${template.charAt(enc3)}${template.charAt(enc4)}`;
-        }
-    }
-    return output;
-}
-function fromBase64(input, useUrlTemplate = false, cutTailZeros = false) {
-    const template = (useUrlTemplate) ? base64UrlTemplate : base64Template;
-    function indexOf(toSearch) {
-        for (let i = 0; i < 64; i++) {
-            if (template.charAt(i) === toSearch)
-                return i;
-        }
-        return 64;
-    }
-    function test(incoming) {
-        return ((incoming === 64) ? 0x00 : incoming);
-    }
-    let i = 0;
-    let output = "";
-    while (i < input.length) {
-        const enc1 = indexOf(input.charAt(i++));
-        const enc2 = (i >= input.length) ? 0x00 : indexOf(input.charAt(i++));
-        const enc3 = (i >= input.length) ? 0x00 : indexOf(input.charAt(i++));
-        const enc4 = (i >= input.length) ? 0x00 : indexOf(input.charAt(i++));
-        const chr1 = (test(enc1) << 2) | (test(enc2) >> 4);
-        const chr2 = ((test(enc2) & 0x0F) << 4) | (test(enc3) >> 2);
-        const chr3 = ((test(enc3) & 0x03) << 6) | test(enc4);
-        output += String.fromCharCode(chr1);
-        if (enc3 !== 64) {
-            output += String.fromCharCode(chr2);
-        }
-        if (enc4 !== 64) {
-            output += String.fromCharCode(chr3);
-        }
-    }
-    if (cutTailZeros) {
-        const outputLength = output.length;
-        let nonZeroStart = (-1);
-        for (let i = (outputLength - 1); i >= 0; i--) {
-            if (output.charCodeAt(i) !== 0) {
-                nonZeroStart = i;
-                break;
-            }
-        }
-        if (nonZeroStart !== (-1)) {
-            output = output.slice(0, nonZeroStart + 1);
-        }
-        else {
-            output = "";
-        }
-    }
-    return output;
-}
-function arrayBufferToString(buffer) {
-    let resultString = "";
-    const view = new Uint8Array(buffer);
-    for (const element of view) {
-        resultString += String.fromCharCode(element);
-    }
-    return resultString;
-}
-function stringToArrayBuffer(str) {
-    const stringLength = str.length;
-    const resultBuffer = new ArrayBuffer(stringLength);
-    const resultView = new Uint8Array(resultBuffer);
-    for (let i = 0; i < stringLength; i++) {
-        resultView[i] = str.charCodeAt(i);
-    }
-    return resultBuffer;
-}
-const log2 = Math.log(2);
-function nearestPowerOf2(length) {
-    const base = (Math.log(length) / log2);
-    const floor = Math.floor(base);
-    const round = Math.round(base);
-    return ((floor === round) ? floor : round);
-}
-function clearProps(object, propsArray) {
-    for (const prop of propsArray) {
-        delete object[prop];
-    }
-}
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/asn1js/src/asn1.js":
 /*!*****************************************!*\
   !*** ./node_modules/asn1js/src/asn1.js ***!
@@ -508,7 +138,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "compareSchema", function() { return compareSchema; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "verifySchema", function() { return verifySchema; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromJSON", function() { return fromJSON; });
-/* harmony import */ var pvutils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pvutils */ "./node_modules/asn1js/node_modules/pvutils/build/utils.es.js");
+/* harmony import */ var pvutils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pvutils */ "./node_modules/pvutils/build/utils.es.js");
 /* eslint-disable indent */
 /*
  * Copyright (c) 2016-2018, Peculiar Ventures
@@ -51618,6 +51248,507 @@ module.exports = g;
 
 /***/ }),
 
+/***/ "./src/i18n/strings.js":
+/*!*****************************!*\
+  !*** ./src/i18n/strings.js ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+const strings = exports.strings = {
+  ux: {
+    upload: 'Upload Certificate'
+  },
+
+  names: {
+    // Directory Pilot Attributes
+    '0.9.2342.19200300.100.1.1': {
+      short: 'uid',
+      long: 'User ID'
+    },
+    '0.9.2342.19200300.100.1.25': {
+      short: 'dc',
+      long: 'Domain Component'
+    },
+
+    // PKCS-9
+    '1.2.840.113549.1.9.1': {
+      short: 'e',
+      long: 'Email Address'
+    },
+
+    // Incorporated Locations
+    '1.3.6.1.4.1.311.60.2.1.1': {
+      short: undefined,
+      long: 'Inc. Locality'
+    },
+    '1.3.6.1.4.1.311.60.2.1.2': {
+      short: undefined,
+      long: 'Inc. State / Province'
+    },
+    '1.3.6.1.4.1.311.60.2.1.3': {
+      short: undefined,
+      long: 'Inc. Country'
+    },
+
+    // microsoft cryptographic extensions
+    '1.3.6.1.4.1.311.21.7': {
+      name: {
+        short: 'Certificate Template',
+        long: 'Microsoft Certificate Template'
+      }
+    },
+    '1.3.6.1.4.1.311.21.10': {
+      name: {
+        short: 'Certificate Policies',
+        long: 'Microsoft Certificate Policies'
+      }
+    },
+
+    // certificate extensions
+    '1.3.6.1.4.1.11129.2.4.2': {
+      name: {
+        short: 'Embedded SCTs',
+        long: 'Embedded Signed Certificate Timestamps'
+      }
+    },
+    '1.3.6.1.5.5.7.1.1': {
+      name: {
+        short: undefined,
+        long: 'Authority Information Access'
+      }
+    },
+    '1.3.6.1.5.5.7.1.24': {
+      name: {
+        short: 'OCSP Stapling',
+        long: 'Online Certificate Status Protocol Stapling'
+      }
+    },
+
+    // X.500 attribute types
+    '2.5.4.1': {
+      short: undefined,
+      long: 'Aliased Entry'
+    },
+    '2.5.4.2': {
+      short: undefined,
+      long: 'Knowledge Information'
+    },
+    '2.5.4.3': {
+      short: 'cn',
+      long: 'Common Name'
+    },
+    '2.5.4.4': {
+      short: 'sn',
+      long: 'Surname'
+    },
+    '2.5.4.5': {
+      short: 'serialNumber',
+      long: 'Serial Number'
+    },
+    '2.5.4.6': {
+      short: 'c',
+      long: 'Country'
+    },
+    '2.5.4.7': {
+      short: 'l',
+      long: 'Locality'
+    },
+    '2.5.4.8': {
+      short: 's',
+      long: 'State / Province'
+    },
+    '2.5.4.9': {
+      short: 'street',
+      long: 'Stress Address'
+    },
+    '2.5.4.10': {
+      short: 'o',
+      long: 'Organization'
+    },
+    '2.5.4.11': {
+      short: 'ou',
+      long: 'Organizational Unit'
+    },
+    '2.5.4.12': {
+      short: 't',
+      long: 'Title'
+    },
+    '2.5.4.13': {
+      short: 'description',
+      long: 'Description'
+    },
+    '2.5.4.14': {
+      short: undefined,
+      long: 'Search Guide'
+    },
+    '2.5.4.15': {
+      short: undefined,
+      long: 'Business Category'
+    },
+    '2.5.4.16': {
+      short: undefined,
+      long: 'Postal Address'
+    },
+    '2.5.4.17': {
+      short: 'postalCode',
+      long: 'Postal Code'
+    },
+    '2.5.4.18': {
+      short: 'POBox',
+      long: 'PO Box'
+    },
+    '2.5.4.19': {
+      short: undefined,
+      long: 'Physical Delivery Office Name'
+    },
+    '2.5.4.20': {
+      short: 'phone',
+      long: 'Phone Number'
+    },
+    '2.5.4.21': {
+      short: undefined,
+      long: 'Telex Number'
+    },
+    '2.5.4.22': {
+      short: undefined,
+      long: 'Teletex Terminal Identifier'
+    },
+    '2.5.4.23': {
+      short: undefined,
+      long: 'Fax Number'
+    },
+    '2.5.4.24': {
+      short: undefined,
+      long: 'X.121 Address'
+    },
+    '2.5.4.25': {
+      short: undefined,
+      long: 'International ISDN Number'
+    },
+    '2.5.4.26': {
+      short: undefined,
+      long: 'Registered Address'
+    },
+    '2.5.4.27': {
+      short: undefined,
+      long: 'Destination Indicator'
+    },
+    '2.5.4.28': {
+      short: undefined,
+      long: 'Preferred Delivery Method'
+    },
+    '2.5.4.29': {
+      short: undefined,
+      long: 'Presentation Address'
+    },
+    '2.5.4.30': {
+      short: undefined,
+      long: 'Supported Application Context'
+    },
+    '2.5.4.31': {
+      short: undefined,
+      long: 'Member'
+    },
+    '2.5.4.32': {
+      short: undefined,
+      long: 'Owner'
+    },
+    '2.5.4.33': {
+      short: undefined,
+      long: 'Role Occupant'
+    },
+    '2.5.4.34': {
+      short: undefined,
+      long: 'See Also'
+    },
+    '2.5.4.35': {
+      short: undefined,
+      long: 'User Password'
+    },
+    '2.5.4.36': {
+      short: undefined,
+      long: 'User Certificate'
+    },
+    '2.5.4.37': {
+      short: undefined,
+      long: 'CA Certificate'
+    },
+    '2.5.4.38': {
+      short: undefined,
+      long: 'Authority Revocation List'
+    },
+    '2.5.4.39': {
+      short: undefined,
+      long: 'Certificate Revocation List'
+    },
+    '2.5.4.40': {
+      short: undefined,
+      long: 'Cross-certificate Pair'
+    },
+    '2.5.4.41': {
+      short: undefined,
+      long: 'Name'
+    },
+    '2.5.4.42': {
+      short: 'g',
+      long: 'Given Name'
+    },
+    '2.5.4.43': {
+      short: 'i',
+      long: 'Initials'
+    },
+    '2.5.4.44': {
+      short: undefined,
+      long: 'Generation Qualifier'
+    },
+    '2.5.4.45': {
+      short: undefined,
+      long: 'Unique Identifier'
+    },
+    '2.5.4.46': {
+      short: undefined,
+      long: 'DN Qualifier'
+    },
+    '2.5.4.47': {
+      short: undefined,
+      long: 'Enhanced Search Guide'
+    },
+    '2.5.4.48': {
+      short: undefined,
+      long: 'Protocol Information'
+    },
+    '2.5.4.49': {
+      short: 'dn',
+      long: 'Distinguished Name'
+    },
+    '2.5.4.50': {
+      short: undefined,
+      long: 'Unique Member'
+    },
+    '2.5.4.51': {
+      short: undefined,
+      long: 'House Identifier'
+    },
+    '2.5.4.52': {
+      short: undefined,
+      long: 'Supported Algorithms'
+    },
+    '2.5.4.53': {
+      short: undefined,
+      long: 'Delta Revocation List'
+    },
+    '2.5.4.58': {
+      short: undefined,
+      long: 'Attribute Certificate Attribute' // huh
+    },
+    '2.5.4.65': {
+      short: undefined,
+      long: 'Pseudonym'
+    },
+
+    // extensions
+    '2.5.29.14': {
+      name: {
+        short: 'Subject Key ID',
+        long: 'Subject Key Identifier'
+      }
+    },
+    '2.5.29.15': {
+      name: {
+        short: undefined,
+        long: 'Key Usages'
+      }
+    },
+    '2.5.29.17': {
+      name: {
+        short: 'Subject Alt Names',
+        long: 'Subject Alternative Names'
+      }
+    },
+    '2.5.29.19': {
+      name: {
+        short: undefined,
+        long: 'Basic Constraints'
+      }
+    },
+    '2.5.29.31': {
+      name: {
+        short: 'CRL Endpoints',
+        long: 'Certificate Revocation List Endpoints'
+      }
+    },
+    '2.5.29.32': {
+      name: {
+        short: undefined,
+        long: 'Certificate Policies'
+      }
+    },
+    '2.5.29.35': {
+      name: {
+        short: 'Authority Key ID',
+        long: 'Authority Key Identifier'
+      }
+    },
+    '2.5.29.37': {
+      name: {
+        short: undefined,
+        long: 'Extended Key Usages'
+      }
+    }
+  },
+
+  keyUsages: ['CRL Signing', 'Certificate Signing', 'Key Agreement', 'Data Encipherment', 'Key Encipherment', 'Non-Repudiation', 'Digital Signature'],
+
+  san: ['Other Name', 'RFC 822 Name', 'DNS Name', 'X.400 Address', 'Directory Name', 'EDI Party Name', 'URI', 'IP Address', 'Registered ID'],
+
+  eKU: {
+    '1.3.6.1.4.1.311.10.3.1': 'Certificate Trust List (CTL) Signing',
+    '1.3.6.1.4.1.311.10.3.2': 'Timestamp Signing',
+    '1.3.6.1.4.1.311.10.3.4': 'EFS Encryption',
+    '1.3.6.1.4.1.311.10.3.4.1': 'EFS Recovery',
+    '1.3.6.1.4.1.311.10.3.5': 'Windows Hardware Quality Labs (WHQL) Cryptography',
+    '1.3.6.1.4.1.311.10.3.7': 'Windows NT 5 Cryptography',
+    '1.3.6.1.4.1.311.10.3.8': 'Windows NT Embedded Cryptography',
+    '1.3.6.1.4.1.311.10.3.10': 'Qualified Subordination',
+    '1.3.6.1.4.1.311.10.3.11': 'Escrowed Key Recovery',
+    '1.3.6.1.4.1.311.10.3.12': 'Document Signing',
+    '1.3.6.1.4.1.311.10.5.1': 'Digital Rights Management',
+    '1.3.6.1.4.1.311.10.6.1': 'Key Pack Licenses',
+    '1.3.6.1.4.1.311.10.6.2': 'License Server',
+    '1.3.6.1.4.1.311.20.2.1': 'Enrollment Agent',
+    '1.3.6.1.4.1.311.20.2.2': 'Smartcard Login',
+    '1.3.6.1.4.1.311.21.5': 'Certificate Authority Private Key Archival',
+    '1.3.6.1.4.1.311.21.6': 'Key Recovery Agent',
+    '1.3.6.1.4.1.311.21.19': 'Directory Service Email Replication',
+    '1.3.6.1.5.5.7.3.1': 'Server Authentication',
+    '1.3.6.1.5.5.7.3.2': 'Client Authentication',
+    '1.3.6.1.5.5.7.3.3': 'Code Signing',
+    '1.3.6.1.5.5.7.3.4': 'E-mail Protection',
+    '1.3.6.1.5.5.7.3.5': 'IPsec End System',
+    '1.3.6.1.5.5.7.3.6': 'IPsec Tunnel',
+    '1.3.6.1.5.5.7.3.7': 'IPSec User',
+    '1.3.6.1.5.5.7.3.8': 'Timestamping',
+    '1.3.6.1.5.5.7.3.9': 'OCSP Signing',
+    '1.3.6.1.5.5.8.2.2': 'Internet Key Exchange (IKE)'
+  },
+
+  signature: {
+    '1.2.840.113549.1.1.5': 'SHA-1 with RSA Encryption',
+    '1.2.840.113549.1.1.11': 'SHA-256 with RSA Encryption',
+    '1.2.840.113549.1.1.12': 'SHA-384 with RSA Encryption',
+    '1.2.840.113549.1.1.13': 'SHA-512 with RSA Encryption',
+    '1.2.840.10040.4.3': 'DSA with SHA-1',
+    '2.16.840.1.101.3.4.3.2': 'DSA with SHA-256',
+    '1.2.840.10045.4.1': 'ECDSA with SHA-1',
+    '1.2.840.10045.4.3.2': 'ECDSA with SHA-256',
+    '1.2.840.10045.4.3.3': 'ECDSA with SHA-384',
+    '1.2.840.10045.4.3.4': 'ECDSA with SHA-512'
+  },
+
+  aia: {
+    '1.3.6.1.5.5.7.48.1': 'Online Certificate Status Protocol (OCSP)',
+    '1.3.6.1.5.5.7.48.2': 'CA Issuers'
+  },
+
+  // this includes qualifiers as well
+  cps: {
+    '0.4.0.194112.1.4': {
+      name: 'ETSI EN-319-411-2',
+      value: undefined
+    },
+    '1.3.6.1.4.1': {
+      name: 'Statement Identifier',
+      value: undefined
+    },
+    '1.3.6.1.5.5.7.2.1': {
+      name: 'Practices Statement',
+      value: undefined
+    },
+    '1.3.6.1.5.5.7.2.2': {
+      name: 'User Notice',
+      value: undefined
+    },
+    '2.16.840': {
+      name: 'ANSI Organizational Identifier',
+      value: undefined
+    },
+    '2.23.140.1.1': {
+      name: 'Certificate Type',
+      value: 'Extended Validation'
+    },
+    '2.23.140.1.2.1': {
+      name: 'Certificate Type',
+      value: 'Domain Validation'
+    },
+    '2.23.140.1.2.2': {
+      name: 'Certificate Type',
+      value: 'Organization Validation'
+    },
+    '2.23.140.1.2.3': {
+      name: 'Certificate Type',
+      value: 'Individual Validation'
+    },
+    '2.23.140.1.3': {
+      name: 'Certificate Type',
+      value: 'Extended Validation (Code Signing)'
+    },
+    '2.23.140.1.31': {
+      name: 'Certificate Type',
+      value: '.onion Extended Validation'
+    },
+    '2.23.140.2.1': {
+      name: 'Certificate Type',
+      value: 'Test Certificate'
+    }
+  },
+
+  microsoftCertificateTypes: {
+    'Administrator': 'Administrator',
+    'CA': 'Root Certification Authority',
+    'CAExchange': 'CA Exchange',
+    'CEPEncryption': 'CEP Encryption',
+    'CertificateRequestAgent': 'Certificate Request Agent',
+    'ClientAuth': 'Authenticated Session',
+    'CodeSigning': 'Code Signing',
+    'CrossCA': 'Cross Certification Authority',
+    'CTLSigning': 'Trust List Signing',
+    'DirectoryEmailReplication': 'Directory Email Replication',
+    'DomainController': 'Domain Controller',
+    'DomainControllerAuthentication': 'Domain Controller Authentication',
+    'EFS': 'Basic EFS',
+    'EFSRecovery': 'EFS Recovery Agent',
+    'EnrollmentAgent': 'Enrollment Agent',
+    'EnrollmentAgentOffline': 'Exchange Enrollment Agent (Offline request)',
+    'ExchangeUser': 'Exchange User',
+    'ExchangeUserSignature': 'Exchange Signature Only',
+    'IPSECIntermediateOffline': 'IPSec (Offline request)',
+    'IPSECIntermediateOnline': 'IPSEC',
+    'KerberosAuthentication': 'Kerberos Authentication',
+    'KeyRecoveryAgent': 'Key Recovery Agent',
+    'Machine': 'Computer',
+    'MachineEnrollmentAgent': 'Enrollment Agent (Computer)',
+    'OCSPResponseSigning': 'OCSP Response Signing',
+    'OfflineRouter': 'Router (Offline request)',
+    'RASAndIASServer': 'RAS and IAS Server',
+    'SmartcardLogon': 'Smartcard Logon',
+    'SmartcardUser': 'Smartcard User',
+    'SubCA': 'Subordinate Certification Authority',
+    'User': 'User',
+    'UserSignature': 'User Signature Only',
+    'WebServer': 'Web Server',
+    'Workstation': 'Workstation Authentication'
+  }
+};
+
+/***/ }),
+
 /***/ "./src/viewer/helpers/eq.js":
 /*!**********************************!*\
   !*** ./src/viewer/helpers/eq.js ***!
@@ -52488,6 +52619,100 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 
 /***/ }),
 
+/***/ "./src/viewer/js/ctlognames.js":
+/*!*************************************!*\
+  !*** ./src/viewer/js/ctlognames.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+const ctLogNames = exports.ctLogNames = {
+  "9606c02c690033aa1d145f59c6e2648d0549f0df96aab8db915a70d8ecf390a5": "Akamai CT",
+  "39376f545f7b4607f59742d768cd5d2437bf3473b6534a4834bcf72e681c83c9": "Alpha CT",
+  "a577ac9ced7548dd8f025b67a241089df86e0f476ec203c2ecbedb185f282638": "CNNIC CT",
+  "cdb5179b7fc1c046feea31136a3f8f002e6182faf8896fecc8b2f5b5ab604900": "Certly.IO",
+  "1fbc36e002ede97f40199e86b3573b8a4217d80187746ad0da03a06054d20df4": "Cloudflare “Nimbus2017”",
+  "db74afeecb29ecb1feca3e716d2ce5b9aabb36f7847183c75d9d4f37b61fbf64": "Cloudflare “Nimbus2018”",
+  "747eda8331ad331091219cce254f4270c2bffd5e422008c6373579e6107bcc56": "Cloudflare “Nimbus2019”",
+  "5ea773f9df56c0e7b536487dd049e0327a919a0c84a112128418759681714558": "Cloudflare “Nimbus2020”",
+  "4494652eb0eeceafc44007d8a8fe28c0dae682bed8cb31b53fd33396b5b681a8": "Cloudflare “Nimbus2021”",
+  "41c8cab1df22464a10c6a13a0942875e4e318b1b03ebeb4bc768f090629606f6": "Cloudflare “Nimbus2022”",
+  "7a328c54d8b72db620ea38e0521ee98416703213854d3bd22bc13a57a352eb52": "Cloudflare “Nimbus2023”",
+  "6ff141b5647e4222f7ef052cefae7c21fd608e27d2af5a6e9f4b8a37d6633ee5": "DigiCert Nessie2018",
+  "fe446108b1d01ab78a62ccfeab6ab2b2babff3abdad80a4d8b30df2d0008830c": "DigiCert Nessie2019",
+  "c652a0ec48ceb3fcab170992c43a87413309e80065a26252401ba3362a17c565": "DigiCert Nessie2020",
+  "eec095ee8d72640f92e3c3b91bc712a3696a097b4b6a1a1438e647b2cbedc5f9": "DigiCert Nessie2021",
+  "51a3b0f5fd01799c566db837788f0ca47acc1b27cbf79e88429a0dfed48b05e5": "DigiCert Nessie2022",
+  "b3737707e18450f86386d605a9dc11094a792db1670c0b87dcf0030e7936a59a": "DigiCert Nessie2023",
+  "5614069a2fd7c2ecd3f5e1bd44b23ec74676b9bc99115cc0ef949855d689d0dd": "DigiCert Server",
+  "8775bfe7597cf88c43995fbdf36eff568d475636ff4ab560c1b4eaff5ea0830f": "DigiCert Server 2",
+  "c1164ae0a772d2d4392dc80ac10770d4f0c49bde991a4840c1fa075164f63360": "DigiCert Yeti2018",
+  "e2694bae26e8e94009e8861bb63b83d43ee7fe7488fba48f2893019dddf1dbfe": "DigiCert Yeti2019",
+  "f095a459f200d18240102d2f93888ead4bfe1d47e399e1d034a6b0a8aa8eb273": "DigiCert Yeti2020",
+  "5cdc4392fee6ab4544b15e9ad456e61037fbd5fa47dca17394b25ee6f6c70eca": "DigiCert Yeti2021",
+  "2245450759552456963fa12ff1f76d86e0232663adc04b7f5dc6835c6ee20f02": "DigiCert Yeti2022",
+  "35cf191bbfb16c57bf0fad4c6d42cbbbb627202651ea3fe12aefa803c33bd64c": "DigiCert Yeti2023",
+  "717ea7420975be84a2723553f1777c26dd51af4e102144094d9019b462fb6668": "GDCA 1",
+  "14308d90ccd030135005c01ca526d81e84e87624e39b6248e08f724aea3bb42a": "GDCA 2",
+  "c9cf890a21109c666cc17a3ed065c930d0e0135a9feba85af14210b8072421aa": "GDCA CT #1",
+  "924a30f909336ff435d6993a10ac75a2c641728e7fc2d659ae6188ffad40ce01": "GDCA CT #2",
+  "fad4c97cc49ee2f8ac85c5ea5cea09d0220dbbf4e49c6b50662ff868f86b8c28": "Google “Argon2017”",
+  "a4501269055a15545e6211ab37bc103f62ae5576a45e4b1714453e1b22106a25": "Google “Argon2018”",
+  "63f2dbcde83bcc2ccf0b728427576b33a48d61778fbd75a638b1c768544bd88d": "Google “Argon2019”",
+  "b21e05cc8ba2cd8a204e8766f92bb98a2520676bdafa70e7b249532def8b905e": "Google “Argon2020”",
+  "f65c942fd1773022145418083094568ee34d131933bfdf0c2f200bcc4ef164e3": "Google “Argon2021”",
+  "2979bef09e393921f056739f63a577e5be577d9c600af8f94d5d265c255dc784": "Google “Argon2022”",
+  "68f698f81f6482be3a8ceeb9281d4cfc71515d6793d444d10a67acbb4f4ffbc4": "Google “Aviator”",
+  "c3bf03a7e1ca8841c607bae3ff4270fca5ec45b186ebbe4e2cf3fc778630f5f6": "Google “Crucible”",
+  "1d024b8eb1498b344dfd87ea3efc0996f7506f235d1d497061a4773c439c25fb": "Google “Daedalus”",
+  "293c519654c83965baaa50fc5807d4b76fbf587a2972dca4c30cf4e54547f478": "Google “Icarus”",
+  "a4b90990b418581487bb13a2cc67700a3c359804f91bdfb8e377cd0ec80ddc10": "Google “Pilot”",
+  "ee4bbdb775ce60bae142691fabe19e66a30f7e5fb072d88300c47b897aa8fdcb": "Google “Rocketeer”",
+  "bbd9dfbc1f8a71b593942397aa927b473857950aab52e81a909664368e1ed185": "Google “Skydiver”",
+  "52eb4b225ec896974850675f23e43bc1d021e3214ce52ecd5fa87c203cdfca03": "Google “Solera2018”",
+  "0b760e9a8b9a682f88985b15e947501a56446bba8830785c3842994386450c00": "Google “Solera2019”",
+  "1fc72ce5a1b799f400c359bff96ca3913548e8644220610952e9ba1774f7bac7": "Google “Solera2020”",
+  "a3c99845e80ab7ce00157b3742df0207dd272b2b602ecf98ee2c12db9c5ae7e7": "Google “Solera2021”",
+  "697aafca1a6b536fae21205046debad7e0eaea13d2432e6e9d8fb379f2b9aaf3": "Google “Solera2022”",
+  "a899d8780c9290aaf462f31880ccfbd52451e970d0fbf591ef75b0d99b645681": "Google “Submariner”",
+  "b0cc83e5a5f97d6baf7c09cc284904872ac7e88b132c6350b7c6fd26e16c6c77": "Google “Testtube”",
+  "b10cd559a6d67846811f7df9a51532739ac48d703bea0323da5d38755bc0ad4e": "Google “Xenon2018”",
+  "084114980071532c16190460bcfc47fdc2653afa292c72b37ff863ae29ccc9f0": "Google “Xenon2019”",
+  "07b75c1be57d68fff1b0c61d2315c7bae6577c5794b76aeebc613a1a69d3a21c": "Google “Xenon2020”",
+  "7d3ef2f88fff88556824c2c0ca9e5289792bc50e78097f2e6a9768997e22f0d7": "Google “Xenon2021”",
+  "46a555eb75fa912030b5a28969f4f37d112c4174befd49b885abf2fc70fe6d47": "Google “Xenon2022”",
+  "7461b4a09cfb3d41d75159575b2e7649a445a8d27709b0cc564a6482b7eb41a3": "Izenpe",
+  "8941449c70742e06b9fc9ce7b116ba0024aa36d59af44f0204404f00f7ea8566": "Izenpe “Argi”",
+  "296afa2d568bca0d2ea844956ae9721fc35fa355ecda99693aafd458a71aefdd": "Let“s Encrypt ”Clicky”",
+  "537b69a3564335a9c04904e39593b2c298eb8d7a6e83023635c627248cd6b440": "Nordu “flimsy”",
+  "aae70b7f3cb8d566c86c2f16979c9f445f69ab0eb4535589b2f77a030104f3cd": "Nordu “plausible”",
+  "e0127629e90496564e3d0147984498aa48f8adb16600eb7902a1ef9909906273": "PuChuangSiDa CT",
+  "cf55e28923497c340d5206d05353aeb25834b52f1f8dc9526809f212efdd7ca6": "SHECA CT 1",
+  "32dc59c2d4c41968d56e14bc61ac8f0e45db39faf3c155aa4252f5001fa0c623": "SHECA CT 2",
+  "db76fdadac65e7d09508886e2159bd8b90352f5fead3e3dc5e22eb350acc7b98": "Sectigo (Comodo) “Dodo” CT",
+  "6f5376ac31f03119d89900a45115ff77151c11d902c10029068db2089a37d913": "Sectigo (Comodo) “Mammoth” CT",
+  "5581d4c2169036014aea0b9b573c53f0c0e43878702508172fa3aa1d0713d30c": "Sectigo (Comodo) “Sabre” CT",
+  "34bb6ad6c3df9c03eea8a499ff7891486c9d5e5cac92d01f7bfd1bce19db48ef": "StartCom",
+  "ddeb1d2b7a0d4fa6208b81ad8168707e2e8e9d01d55c888d3d11c4cdb6ecbecc": "Symantec",
+  "a7ce4a4e6207e0addee5fdaa4b1f86768767b5d002a55d47310e7e670a95eab2": "Symantec Deneb",
+  "15970488d7b997a05beb52512adee8d2e8b4a3165264121a9fabfbd5f85ad93f": "Symantec “Sirius”",
+  "bc78e1dfc5f63c684649334da10fa15f0979692009c081b4f3f6917f3ed9b8a5": "Symantec “Vega”",
+  "b0b784bc81c0ddc47544e883f05985bb9077d134d8ab88b2b2e533980b8e508b": "Up In The Air “Behind the Sofa”",
+  "ac3b9aed7fa9674757159e6d7d575672f9d98100941e9bdeffeca1313b75782d": "Venafi",
+  "03019df3fd85a69a8ebd1facc6da9ba73e469774fe77f579fc5a08b8328c1d6b": "Venafi Gen2 CT",
+  "41b2dc2e89e63ce4af1ba7bb29bf68c6dee6f9f1cc047e30dffae3b3ba259263": "WoSign",
+  "63d0006026dde10bb0601f452446965ee2b6ea2cd4fbc95ac866a550af9075b7": "WoSign 2",
+  "9e4ff73dc3ce220b69217c899e468076abf8d78636d5ccfc85a31a75628ba88b": "WoSign CT #1"
+};
+
+/***/ }),
+
 /***/ "./src/viewer/js/der.js":
 /*!******************************!*\
   !*** ./src/viewer/js/der.js ***!
@@ -52509,11 +52734,13 @@ var asn1js = _interopRequireWildcard(_asn1js);
 
 var _pkijs = __webpack_require__(/*! pkijs */ "./node_modules/pkijs/src/index.js");
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _ctlognames = __webpack_require__(/*! ./ctlognames.js */ "./src/viewer/js/ctlognames.js");
 
-/*import { ctLogNames } from './ctlognames.js';
-import { strings } from '../../i18n/strings.js';
-import { b64urltodec, b64urltohex, getObjPath, hash, hashify, pemToBER } from './utils.js';*/
+var _strings = __webpack_require__(/*! ../../i18n/strings.js */ "./src/i18n/strings.js");
+
+var _utils = __webpack_require__(/*! ./utils.js */ "./src/viewer/js/utils.js");
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 const getX509Ext = (extensions, v) => {
   for (var extension in extensions) {
@@ -52528,7 +52755,70 @@ const getX509Ext = (extensions, v) => {
   };
 };
 
+const parseSubsidiary = distinguishedNames => {
+  const subsidiary = {
+    cn: '',
+    dn: [],
+    entries: []
+  };
+
+  distinguishedNames.forEach(dn => {
+    const name = _strings.strings.names[dn.type];
+    const value = dn.value.valueBlock.value;
+
+    if (name === undefined) {
+      subsidiary.dn.push(`OID.${dn.type}=${value}`);
+      subsidiary.entries.push([`OID.${dn.type}`, value]);
+    } else if (name.short === undefined) {
+      subsidiary.dn.push(`OID.${dn.type}=${value}`);
+      subsidiary.entries.push([name.long, value]);
+    } else {
+      subsidiary.dn.push(`${name.short}=${value}`);
+      subsidiary.entries.push([name.long, value]);
+
+      // add the common name for tab display
+      if (name.short === 'cn') {
+        subsidiary.cn = value;
+      }
+    }
+  });
+
+  // turn path into a string
+  subsidiary.dn = subsidiary.dn.join(', ');
+
+  return subsidiary;
+};
+
 const parse = exports.parse = async certificate => {
+  const supportedExtensions = ['1.3.6.1.4.1.311.20.2', // microsoft certificate type
+  '1.3.6.1.4.1.311.21.2', // microsoft certificate previous hash
+  '1.3.6.1.4.1.311.21.7', // microsoft certificate template
+  '1.3.6.1.4.1.311.21.1', // microsoft certification authority renewal
+  '1.3.6.1.4.1.311.21.10', // microsoft certificate policies
+  '1.3.6.1.4.1.11129.2.4.2', // embedded scts
+  '1.3.6.1.5.5.7.1.1', // authority info access
+  '1.3.6.1.5.5.7.1.24', // ocsp stapling
+  '1.3.101.77', // ct redaction - deprecated and not displayed
+  '2.5.29.14', // subject key identifier
+  '2.5.29.15', // key usages
+  '2.5.29.17', // subject alt names
+  '2.5.29.19', // basic constraints
+  '2.5.29.31', // crl points
+  '2.5.29.32', // certificate policies
+  '2.5.29.35', // authority key identifier
+  '2.5.29.37'];
+
+  // get the current time zone - note that there are some time zones that this doesn't easily
+  // match, for whatever reason.  https://github.com/april/certainly-something/issues/21
+  let timeZone = new Date().toString().match(/\(([A-Za-z\s].*)\)/);
+  if (timeZone === null) {
+    // America/Chicago
+    timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } else if (timeZone.length > 1) {
+    timeZone = timeZone[1]; // Central Daylight Time
+  } else {
+    timeZone = 'Local Time'; // not sure if this is right, but let's go with it for now
+  }
 
   // parse the certificate
   const asn1 = asn1js.fromBER(certificate);
@@ -52536,16 +52826,351 @@ const parse = exports.parse = async certificate => {
   let x509 = new _pkijs.Certificate({ schema: asn1.result });
   x509 = x509.toJSON();
 
-  // get the embedded SCTs
-  let scts = getX509Ext(x509.extensions, '1.3.6.1.4.1.11129.2.4.2').parsedValue;
+  // convert the cert to PEM
+  const certBTOA = window.btoa(String.fromCharCode.apply(null, new Uint8Array(certificate))).match(/.{1,64}/g).join('\r\n');
 
-  let downloading = browser.downloads.download({
-    url: URL.createObjectURL(new Blob([JSON.stringify(scts)], { type: 'application/json' }))
-
+  // get which extensions are critical
+  const criticalExtensions = [];
+  x509.extensions.forEach(ext => {
+    if (ext.hasOwnProperty('critical') && ext.critical === true) {
+      criticalExtensions.push(ext.extnID);
+    }
   });
 
-  //console.log(JSON.stringify(scts))
-  //  console.log(scts)
+  // get the public key info
+  let spki = Object.assign({
+    crv: undefined,
+    e: undefined,
+    kty: undefined,
+    n: undefined,
+    keysize: undefined,
+    x: undefined,
+    xy: undefined,
+    y: undefined
+  }, x509.subjectPublicKeyInfo);
+
+  if (spki.kty === 'RSA') {
+    spki.e = (0, _utils.b64urltodec)(spki.e); // exponent
+    spki.keysize = (0, _utils.b64urltohex)(spki.n).length * 8; // key size in bits
+    spki.n = (0, _utils.hashify)((0, _utils.b64urltohex)(spki.n)); // modulus
+  } else if (spki.kty === 'EC') {
+    spki.kty = 'Elliptic Curve';
+    spki.keysize = parseInt(spki.crv.split('-')[1]); // this is a bit hacky
+    spki.x = (0, _utils.hashify)((0, _utils.b64urltohex)(spki.x)); // x coordinate
+    spki.y = (0, _utils.hashify)((0, _utils.b64urltohex)(spki.y)); // y coordinate
+    spki.xy = `04:${spki.x}:${spki.y}`; // 04 (uncompressed) public key
+  }
+
+  // get the keyUsages
+  const keyUsages = {
+    critical: criticalExtensions.includes('2.5.29.15'),
+    purposes: []
+  };
+
+  let keyUsagesBS = getX509Ext(x509.extensions, '2.5.29.15').parsedValue;
+  if (keyUsagesBS !== undefined) {
+    // parse the bit string, shifting as necessary
+    let unusedBits = keyUsagesBS.valueBlock.unusedBits;
+    keyUsagesBS = parseInt(keyUsagesBS.valueBlock.valueHex, 16) >> unusedBits;
+
+    // iterate through the bit string
+    _strings.strings.keyUsages.slice(unusedBits - 1).forEach(usage => {
+      if (keyUsagesBS & 1) {
+        keyUsages.purposes.push(usage);
+      }
+
+      keyUsagesBS = keyUsagesBS >> 1;
+    });
+
+    // reverse the order for legibility
+    keyUsages.purposes.reverse();
+  };
+
+  // get the subjectAltNames
+  let san = getX509Ext(x509.extensions, '2.5.29.17').parsedValue;
+  if (san && san.hasOwnProperty('altNames')) {
+    san = Object.keys(san.altNames).map(x => {
+      const type = san.altNames[x].type;
+
+      switch (type) {
+        case 4:
+          // directory
+          return [_strings.strings.san[type], parseSubsidiary(san.altNames[x].value.typesAndValues).dn];
+        case 7:
+          // ip address
+          let address = san.altNames[x].value.valueBlock.valueHex;
+
+          if (address.length === 8) {
+            // ipv4
+            return [_strings.strings.san[type], address.match(/.{1,2}/g).map(x => parseInt(x, 16)).join('.')];
+          } else if (address.length === 32) {
+            // ipv6
+            return [_strings.strings.san[type], address.toLowerCase().match(/.{1,4}/g).join(':').replace(/\b:?(?:0+:?){2,}/, '::')];
+          } else {
+            return [_strings.strings.san[type], 'Unknown IP address'];
+          }
+        default:
+          return [_strings.strings.san[type], san.altNames[x].value];
+      }
+    });
+  } else {
+    san = [];
+  }
+
+  san = {
+    altNames: san,
+    critical: criticalExtensions.includes('2.5.29.17')
+  };
+
+  // get the basic constraints
+  let basicConstraints;
+  const basicConstraintsExt = getX509Ext(x509.extensions, '2.5.29.19');
+  if (basicConstraintsExt && basicConstraintsExt.parsedValue) {
+    basicConstraints = {
+      cA: basicConstraintsExt.parsedValue.cA !== undefined && basicConstraintsExt.parsedValue.cA,
+      critical: criticalExtensions.includes('2.5.29.19')
+    };
+  }
+
+  // get the extended key usages
+  let eKeyUsages = getX509Ext(x509.extensions, '2.5.29.37').parsedValue;
+  if (eKeyUsages) {
+    eKeyUsages = {
+      critical: criticalExtensions.includes('2.5.29.37'),
+      purposes: eKeyUsages.keyPurposes.map(x => _strings.strings.eKU[x] || x)
+    };
+  }
+
+  // get the subject key identifier
+  let sKID = getX509Ext(x509.extensions, '2.5.29.14').parsedValue;
+  if (sKID) {
+    sKID = {
+      critical: criticalExtensions.includes('2.5.29.14'),
+      id: (0, _utils.hashify)(sKID.valueBlock.valueHex)
+    };
+  }
+
+  // get the authority key identifier
+  let aKID = getX509Ext(x509.extensions, '2.5.29.35').parsedValue;
+  if (aKID) {
+    aKID = {
+      critical: criticalExtensions.includes('2.5.29.35'),
+      id: (0, _utils.hashify)(aKID.keyIdentifier.valueBlock.valueHex)
+    };
+  }
+
+  // get the CRL points
+  let crlPoints = getX509Ext(x509.extensions, '2.5.29.31').parsedValue;
+  if (crlPoints) {
+    crlPoints = {
+      critical: criticalExtensions.includes('2.5.29.31'),
+      points: crlPoints.distributionPoints.map(x => x.distributionPoint[0].value)
+    };
+  }
+
+  let ocspStaple = getX509Ext(x509.extensions, '1.3.6.1.5.5.7.1.24').extnValue;
+  if (ocspStaple && ocspStaple.valueBlock.valueHex === '3003020105') {
+    ocspStaple = {
+      critical: criticalExtensions.includes('1.3.6.1.5.5.7.1.24'),
+      required: true
+    };
+  } else {
+    ocspStaple = {
+      critical: criticalExtensions.includes('1.3.6.1.5.5.7.1.24'),
+      required: false
+    };
+  }
+
+  // get the Authority Information Access
+  let aia = getX509Ext(x509.extensions, '1.3.6.1.5.5.7.1.1').parsedValue;
+  if (aia) {
+    aia = aia.accessDescriptions.map(x => {
+      return {
+        location: x.accessLocation.value,
+        method: _strings.strings.aia[x.accessMethod]
+      };
+    });
+  }
+
+  aia = {
+    descriptions: aia,
+    critical: criticalExtensions.includes('1.3.6.1.5.5.7.1.1')
+
+    // get the embedded SCTs
+  };let scts = getX509Ext(x509.extensions, '1.3.6.1.4.1.11129.2.4.2').parsedValue;
+  if (scts) {
+    scts = Object.keys(scts.timestamps).map(x => {
+      let logId = scts.timestamps[x].logID.toLowerCase();
+      return {
+        logId: (0, _utils.hashify)(logId),
+        name: _ctlognames.ctLogNames.hasOwnProperty(logId) ? _ctlognames.ctLogNames[logId] : undefined,
+        signatureAlgorithm: `${scts.timestamps[x].hashAlgorithm.replace('sha', 'SHA-')} ${scts.timestamps[x].signatureAlgorithm.toUpperCase()}`,
+        timestamp: `${scts.timestamps[x].timestamp.toLocaleString()} (${timeZone})`,
+        version: scts.timestamps[x].version + 1
+      };
+    });
+  } else {
+    scts = [];
+  }
+
+  scts = {
+    critical: criticalExtensions.includes('1.3.6.1.4.1.11129.2.4.2'),
+    timestamps: scts
+
+    // Certificate Policies, this stuff is really messy
+  };let cp = getX509Ext(x509.extensions, '2.5.29.32').parsedValue;
+  if (cp && cp.hasOwnProperty('certificatePolicies')) {
+    cp = cp.certificatePolicies.map(x => {
+      let id = x.policyIdentifier;
+      let name = _strings.strings.cps.hasOwnProperty(id) ? _strings.strings.cps[id].name : undefined;
+      let qualifiers = undefined;
+      let value = _strings.strings.cps.hasOwnProperty(id) ? _strings.strings.cps[id].value : undefined;
+
+      // ansi organization identifiers
+      if (id.startsWith('2.16.840')) {
+        value = id;
+        id = '2.16.840';
+        name = _strings.strings.cps['2.16.840'].name;
+      }
+
+      // statement identifiers
+      if (id.startsWith('1.3.6.1.4.1')) {
+        value = id;
+        id = '1.3.6.1.4.1';
+        name = _strings.strings.cps['1.3.6.1.4.1'].name;
+      }
+
+      if (x.hasOwnProperty('policyQualifiers')) {
+        qualifiers = x.policyQualifiers.map(qualifier => {
+          let id = qualifier.policyQualifierId;
+          let name = _strings.strings.cps.hasOwnProperty(id) ? _strings.strings.cps[id].name : undefined;
+          let value = qualifier.qualifier.valueBlock.value;
+
+          // sometimes they are multiple qualifier subblocks, and for now we'll
+          // only return the first one because it's getting really messy at this point
+          if (Array.isArray(value) && value.length === 1) {
+            value = value[0].valueBlock.value;
+          } else if (Array.isArray(value) && value.length > 1) {
+            value = '(currently unsupported)';
+          }
+
+          return {
+            id,
+            name,
+            value
+          };
+        });
+      }
+
+      return {
+        id,
+        name,
+        qualifiers,
+        value
+      };
+    });
+  }
+
+  cp = {
+    critical: criticalExtensions.includes('2.5.29.32'),
+    policies: cp
+
+    // now let's parse the Microsoft cryptographic extensions
+  };let msCrypto = {
+    caVersion: getX509Ext(x509.extensions, '1.3.6.1.4.1.311.21.1').parsedValue,
+    certificatePolicies: getX509Ext(x509.extensions, '1.3.6.1.4.1.311.21.10').parsedValue,
+    certificateTemplate: getX509Ext(x509.extensions, '1.3.6.1.4.1.311.21.7').parsedValue,
+    certificateType: getX509Ext(x509.extensions, '1.3.6.1.4.1.311.20.2').parsedValue,
+    previousHash: getX509Ext(x509.extensions, '1.3.6.1.4.1.311.21.2').parsedValue
+  };
+
+  if (msCrypto.caVersion && Number.isInteger(msCrypto.caVersion.keyIndex) && Number.isInteger(msCrypto.caVersion.certificateIndex)) {
+    msCrypto.caVersion = {
+      critical: criticalExtensions.includes('1.3.6.1.4.1.311.21.1'),
+      caRenewals: msCrypto.caVersion.certificateIndex,
+      keyReuses: msCrypto.caVersion.certificateIndex - msCrypto.caVersion.keyIndex
+    };
+  }
+
+  if (msCrypto.certificatePolicies) {
+    msCrypto.certificatePolicies = {
+      critical: criticalExtensions.includes('1.3.6.1.4.1.311.21.10'),
+      purposes: msCrypto.certificatePolicies.certificatePolicies.map(x => _strings.strings.eKU[x.policyIdentifier] || x.policyIdentifier)
+    };
+  }
+
+  if (msCrypto.certificateTemplate) {
+    msCrypto.certificateTemplate = {
+      critical: criticalExtensions.includes('1.3.6.1.4.1.311.21.7'),
+      id: msCrypto.certificateTemplate.extnID,
+      major: msCrypto.certificateTemplate.templateMajorVersion,
+      minor: msCrypto.certificateTemplate.templateMinorVersion
+    };
+  }
+
+  if (msCrypto.certificateType) {
+    msCrypto.certificateType = {
+      critical: criticalExtensions.includes('1.3.6.1.4.1.311.20.2'),
+      type: _strings.strings.microsoftCertificateTypes[msCrypto.certificateType.valueBlock.value] || 'Unknown'
+    };
+  }
+
+  if (msCrypto.previousHash) {
+    msCrypto.previousHash = {
+      critical: criticalExtensions.includes('1.3.6.1.4.1.311.21.2'),
+      previousHash: (0, _utils.hashify)(msCrypto.previousHash.valueBlock.valueHex)
+    };
+  }
+
+  msCrypto.exists = msCrypto.caVersion || msCrypto.certificatePolicies || msCrypto.certificateTemplate || msCrypto.certificateType || msCrypto.previousHash ? true : false;
+
+  // determine which extensions weren't supported
+  let unsupportedExtensions = [];
+  x509.extensions.forEach(ext => {
+    if (!supportedExtensions.includes(ext.extnID)) {
+      unsupportedExtensions.push(ext.extnID);
+    }
+  });
+
+  // console.log('returning from parse() for cert', x509);
+
+  // the output shell
+  return {
+    ext: {
+      aia,
+      aKID,
+      basicConstraints,
+      crlPoints,
+      cp,
+      eKeyUsages,
+      keyUsages,
+      msCrypto,
+      ocspStaple,
+      scts: scts,
+      sKID,
+      san
+    },
+    files: {
+      der: undefined,
+      pem: encodeURI(`-----BEGIN CERTIFICATE-----\r\n${certBTOA}\r\n-----END CERTIFICATE-----\r\n`)
+    },
+    fingerprint: {
+      'sha1': await (0, _utils.hash)('SHA-1', certificate),
+      'sha256': await (0, _utils.hash)('SHA-256', certificate)
+    },
+    issuer: parseSubsidiary(x509.issuer.typesAndValues),
+    notBefore: `${x509.notBefore.value.toLocaleString()} (${timeZone})`,
+    notAfter: `${x509.notAfter.value.toLocaleString()} (${timeZone})`,
+    subject: parseSubsidiary(x509.subject.typesAndValues),
+    serialNumber: (0, _utils.hashify)((0, _utils.getObjPath)(x509, 'serialNumber.valueBlock.valueHex')),
+    signature: {
+      name: _strings.strings.signature[(0, _utils.getObjPath)(x509, 'signature.algorithmId')],
+      type: (0, _utils.getObjPath)(x509, 'signature.algorithmId')
+    },
+    subjectPublicKeyInfo: spki,
+    unsupportedExtensions,
+    version: (x509.version + 1).toString()
+  };
 };
 
 /***/ }),
@@ -52574,12 +53199,221 @@ __webpack_require__(/*! ./render.js */ "./src/viewer/js/render.js");
 "use strict";
 
 
+var _der = __webpack_require__(/*! ./der.js */ "./src/viewer/js/der.js");
+
+var _utils = __webpack_require__(/*! ./utils.js */ "./src/viewer/js/utils.js");
+
+let template = __webpack_require__(/*! ../index.handlebars */ "./src/viewer/index.handlebars");
+
+// returns an object with a certs array: it either inserts them into an existing securityInfo
+// object, or it creates a new object containing only the certs
+const buildChain = async chain => {
+  let builtChain;
+
+  // probably a PEM encoded certificate
+  if (typeof chain === 'string' && chain.includes('-----BEGIN CERTIFICATE-----')) {
+    builtChain = chain.trim().replace(/\r|\n|\0/g, '').split(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/g).filter(v => v.startsWith('MII'));
+
+    builtChain = builtChain.map(cert => {
+      return (0, _utils.pemToBER)(cert);
+    });
+  } else if (chain.buffer) {
+    // DER encoded
+    builtChain = [chain.buffer];
+  } else if (typeof chain === 'object' && Array.isArray(chain)) {
+    builtChain = chain.map(cert => {
+      return new Uint8Array(cert.rawDER).buffer;
+    });
+  }
+
+  // now we need to parse each of the certificates, and return the parsed chain
+  return await Promise.all(builtChain.map(cert => (0, _der.parse)(cert)));
+};
+
+// redirect to the error page
+const error = message => {
+  if (message === undefined) {
+    message = 'Error loading certificate information. Please close this page, refresh your tab, and try again. Sorry!';
+  }
+
+  window.location.href = `/viewer/error.html?message=${encodeURIComponent(message)}`;
+};
+
+const postRender = () => {
+  // setup handlers for tabbing between certificates
+  const buttons = document.getElementById('certificates').getElementsByClassName('panel-section-tabs-button');
+  const certificates = document.getElementsByClassName('certificate');
+  const longhexes = document.getElementsByClassName('long-hex');
+  const issuerlinks = document.getElementsByClassName('issuer-link');
+
+  // setup the event handlers for tabs
+  for (let node of buttons) {
+    node.addEventListener('click', event => {
+
+      Array.from(buttons).forEach(button => {
+        if (event.target === button) {
+          button.classList.add('selected');
+        } else {
+          button.classList.remove('selected');
+        }
+      });
+
+      Array.from(certificates).forEach(certificate => {
+        if (event.target.getAttribute('data-certificate-index') == certificate.getAttribute('data-certificate-index')) {
+          certificate.removeAttribute('hidden');
+        } else {
+          certificate.setAttribute('hidden', true);
+        }
+      });
+    });
+  }
+
+  // setup event handler for issuer navigation
+  for (let node of issuerlinks) {
+    node.addEventListener('click', event => {
+      for (let button of buttons) {
+        if (parseInt(node.id) + 1 == button.getAttribute('data-certificate-index')) {
+          button.dispatchEvent(new Event('click'));
+        }
+      }
+    });
+  }
+
+  // make long hex values expand if clicked upon
+  for (let node of longhexes) {
+    node.addEventListener('click', event => event.target.classList.toggle('long-hex'));
+  }
+};
+
+const render = securityInfo => {
+  // console.log('about to render with this securityInfo', securityInfo);
+
+  // change the tab title
+  document.title = `${securityInfo.certs[0].subject.cn} (Certainly Something)`;
+
+  // do some minor cleanup on the securityInfo data - we don't want to put this in the handler, as
+  // it gets called too frequently
+  if (securityInfo.protocolVersion) {
+    // TLSv1 --> TLS 1.0
+    if (securityInfo.protocolVersion === 'TLSv1') {
+      securityInfo.protocolVersion = 'TLS 1.0';
+    }
+
+    securityInfo.protocolVersion = securityInfo.protocolVersion.replace('v', ' ');
+  }
+
+  // render the handlebars template
+  // document.body.innerHTML = Handlebars.templates.viewer(securityInfo);
+  document.body.innerHTML = template(securityInfo);
+
+  // once handlebars has rendered, let us setup event handlers
+  postRender();
+};
+
+const handleDOMContentLoaded = async () => {
+  // get the URL parameters, see if cert is defined
+  const url = new URL(window.location);
+  const params = new URLSearchParams(url.search);
+
+  if (window.location.pathname.includes('upload.html')) {
+    // do nothing on upload page
+    return;
+  } else if (window.location.pathname.includes('error.html')) {
+    document.getElementById('message').textContent = decodeURIComponent(params.get('message'));
+    return;
+  } else if (params.get('mode') === 'upload') {
+    // sent here from upload page
+    const certificate = new Uint8Array(JSON.parse(localStorage.getItem('certificate'))['file']);
+    const certificateString = String.fromCharCode.apply(null, certificate);
+
+    // clear out the local storage so as to not leave the certificate on disk
+    localStorage.clear();
+
+    if (certificateString.includes('-----BEGIN CERTIFICATE-----')) {
+      // PEM
+      render({
+        certs: await buildChain(certificateString)
+      });
+    } else if (certificate[0] === 0x30 && certificate[1] === 0x82) {
+      // DER
+      render({
+        certs: await buildChain(certificate)
+      });
+    } else {
+      // we can't parse it
+      error('Unable to parse certificate.');
+    }
+  } else {
+    // clicked icon in address bar
+    // get the tab id
+    const tid = window.location.search.split('=')[1];
+
+    chrome.runtime.sendMessage({
+      'action': 'getSecurityInfo',
+      'tabId': tid
+    }, async response => {
+      // close the tab if we don't get a response back
+      // this shouldn't happen anymore, but lets redirect to an error page
+      if (response === undefined) {
+        error();
+        return;
+      }
+
+      // stuff the parsed certificate chain into securityInfo
+      response['certs'] = await buildChain(response['certificates']);
+
+      // now we need to copy over any isBuiltInRoot stuff
+      response.certificates.forEach((certificate, i) => {
+        response.certs[i]['isBuiltInRoot'] = certificate.isBuiltInRoot;
+      });
+
+      // and then render the certificate
+      render(response);
+    });
+  }
+};
+
+// initialize the document
+document.addEventListener('DOMContentLoaded', () => {
+  handleDOMContentLoaded();
+});
+
+// the upload certificate event handler
+if (window.location.pathname.includes('upload.html')) {
+  document.getElementById('uploadCertificate').addEventListener('change', e => {
+    const reader = new FileReader();
+
+    // create the event handler to redirect once the pem file is loaded
+    reader.addEventListener('load', e => {
+      const file = Array.from(new Uint8Array(e.target.result));
+      localStorage.setItem('certificate', JSON.stringify({ file }));
+      document.location = `/viewer/index.html?mode=upload`;
+    });
+
+    // read the file in as binary
+    reader.readAsArrayBuffer(e.target.files[0]);
+  });
+
+  // click the upload button automatically
+  document.getElementById('uploadCertificate').click();
+}
+
+/***/ }),
+
+/***/ "./src/viewer/js/utils.js":
+/*!********************************!*\
+  !*** ./src/viewer/js/utils.js ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.buildChain = exports.pemToBER = undefined;
-
-var _der = __webpack_require__(/*! ./der.js */ "./src/viewer/js/der.js");
+exports.pemToBER = exports.hashify = exports.hash = exports.getObjPath = exports.b64urltohex = exports.b64urltodec = undefined;
 
 var _asn1js = __webpack_require__(/*! asn1js */ "./node_modules/asn1js/src/asn1.js");
 
@@ -52589,37 +53423,48 @@ var _pvutils = __webpack_require__(/*! pvutils */ "./node_modules/pvutils/build/
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-let template = __webpack_require__(/*! ../index.handlebars */ "./src/viewer/index.handlebars");
+const b64urltodec = exports.b64urltodec = b64 => {
+  return new asn1js.Integer({ valueHex: (0, _pvutils.stringToArrayBuffer)((0, _pvutils.fromBase64)('AQAB', true, true)) }).valueBlock._valueDec;
+};
+
+const b64urltohex = exports.b64urltohex = b64 => {
+  const hexBuffer = new asn1js.Integer({ valueHex: (0, _pvutils.stringToArrayBuffer)((0, _pvutils.fromBase64)(b64, true, true)) }).valueBlock._valueHex;
+  const hexArray = Array.from(new Uint8Array(hexBuffer));
+
+  return hexArray.map(b => ('00' + b.toString(16)).slice(-2));
+};
+
+// this particular prototype override makes it easy to chain down complex objects
+const getObjPath = exports.getObjPath = (obj, path) => {
+  for (var i = 0, path = path.split('.'), len = path.length; i < len; i++) {
+    if (Array.isArray(obj[path[i]])) {
+      obj = obj[path[i]][path[i + 1]];
+      i++;
+    } else {
+      obj = obj[path[i]];
+    }
+  };
+
+  return obj;
+};
+
+const hash = exports.hash = async (algo, buffer) => {
+  const hashBuffer = await crypto.subtle.digest(algo, buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  return hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join(':').toUpperCase();
+};
+
+const hashify = exports.hashify = hash => {
+  if (typeof hash === 'string') {
+    return hash.match(/.{2}/g).join(':').toUpperCase();
+  } else {
+    return hash.join(':').toUpperCase();
+  }
+};
 
 const pemToBER = exports.pemToBER = pem => {
   return (0, _pvutils.stringToArrayBuffer)(window.atob(pem));
-};
-
-// returns an object with a certs array: it either inserts them into an existing securityInfo
-// object, or it creates a new object containing only the certs
-const buildChain = exports.buildChain = async chain => {
-  let builtChain;
-
-  // probably a PEM encoded certificate
-  if (typeof chain === 'string' && chain.includes('-----BEGIN CERTIFICATE-----')) {
-    builtChain = chain.trim().replace(/\r|\n|\0/g, '').split(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/g).filter(v => v.startsWith('MII'));
-
-    builtChain = builtChain.map(cert => {
-      return pemToBER(cert);
-    });
-  } else if (chain.buffer) {
-    // DER encoded
-    builtChain = [chain.buffer];
-  } else if (typeof chain === 'object' && Array.isArray(chain)) {
-    builtChain = chain.map(cert => {
-      return new Uint8Array(cert.rawDER).buffer;
-    });
-  } else {
-    console.log("else");
-  }
-
-  // now we need to parse each of the certificates, and return the parsed chain
-  return await Promise.all(builtChain.map(cert => (0, _der.parse)(cert)));
 };
 
 /***/ })

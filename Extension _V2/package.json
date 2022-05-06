@@ -3,6 +3,7 @@
   "version": "1.2.3",
   "description": "Certainly Something is an advanced digital certificate viewer with an easy to use interface.",
   "license": "MPL-2.0",
+
   "scripts": {
     "compile": "webpack --config=config/webpack.config.js",
     "package": "web-ext build -s build -a dist --overwrite-dest",
@@ -19,9 +20,12 @@
   "homepage": "https://github.com/april/certainly-something#readme",
   "dependencies": {
     "asn1": "^0.2.6",
+    "global": "^4.4.0",
     "handlebars": "^4.1.2",
     "license-webpack-plugin": "^1.5.0",
-    "pkijs": "^2.3.0"
+    "pkijs": "^2.3.0",
+    "selenium-webdriver": "^4.1.1",
+    "web-ext": "^6.8.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

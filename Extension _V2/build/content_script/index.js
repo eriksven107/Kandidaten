@@ -126,11 +126,6 @@ browser.runtime.onMessage.addListener(async request => {
   return true;
 });
 
-window.onload = function () {
-
-  console.log("Inne");
-};
-
 /***/ })
 
 /******/ });
